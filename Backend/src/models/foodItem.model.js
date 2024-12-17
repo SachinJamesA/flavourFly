@@ -26,6 +26,12 @@ const foodItemSchema = new Schema({
         ref: 'Restaurant',
         required: true
     },
+    category: {
+        type: String,
+        required: true,
+        trim: true,
+        enum: ['Appetizer', 'Main Course', 'Dessert', 'Beverage']
+    }
 }, {timestamps: true});
 
 export const FoodItem = mongoose.model("FoodItem", foodItemSchema);

@@ -37,10 +37,21 @@ const restaurantSchema = new Schema(
         ref: "FoodItem",
       },
     ],
+    reviews: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Review",
+      }
+    ],
     coverImage: {
       type: String, // URL for the restaurant cover image
       default: "",
     },
+    status: {
+      type: String,
+      required: true,
+      enum: ["available", "Closed"]
+    }
   },
   { timestamps: true }
 );
