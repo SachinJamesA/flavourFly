@@ -29,10 +29,12 @@ app.use(cookieParser());
 
 import userRouter from "./routes/user.routes.js";
 import restaurantRouter from "./routes/restaurant.routes.js";
+import orderRouter from "./routes/order.routes.js";
 
 // routes declaration
 
 app.use("/api/v1/users", userRouter);
 app.use("/api/v1/restaurants", restaurantRouter);
+app.use("/api/v1/orders", orderRouter);
 
 export { app };
