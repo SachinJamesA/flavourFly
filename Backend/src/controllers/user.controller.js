@@ -1,4 +1,4 @@
-// import { mongoose } from "mongoose";
+import { mongoose } from "mongoose";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { User } from "../models/user.model.js";
 import { ApiError } from "../utils/ApiError.js";
@@ -23,6 +23,7 @@ const generateAccessAndRefreshToken = async (userId) => {
   }
 };
 
+// Register user
 const registerUser = asyncHandler(async (req, res) => {
   // get user details from frontend
   // Validation - not empty
@@ -91,6 +92,7 @@ const registerUser = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, createdUser, "User registered successfully"));
 });
 
+// Login user
 const loginUser = asyncHandler(async (req, res) => {
   // get the data from req body
   // login through username or email
@@ -148,6 +150,7 @@ const loginUser = asyncHandler(async (req, res) => {
     );
 });
 
+// Logout user
 const logoutUser = asyncHandler(async (req, res) => {
   // Need to clear the cookies
   // Need to remove refresh token
@@ -175,4 +178,92 @@ const logoutUser = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, {}, "User Logged Out"));
 });
 
-export { registerUser, loginUser, generateAccessAndRefreshToken, logoutUser };
+// get user details
+const getUserDetails = asyncHandler(async (req, res) => {
+  const userId = req.user._id;
+
+  // Validate the user id
+  if (!mongoose.isValidObjectId(userId)) {
+    throw new ApiError(400, "Invalid user id");
+  }
+
+  // find the users in the database
+  const user = await User.findById(userId).select("-password -refreshToken");
+  if (!user) {
+    throw new ApiError(404, "User not found");
+  }
+
+  // Return the user details
+  return res
+    .status(200)
+    .json(new ApiResponse(200, user, "User details fetched successfully"));
+});
+
+// Update user profile
+const updateProfile = asyncHandler(async (req, res) => {
+  const userId = req.user._id;
+
+  // Validate the user id
+  if(!mongoose.isValidObjectId(userId)) {
+    throw new ApiError(404, "User not found")
+  }
+
+  // Find the user 
+  const user = await User.findById(userId);
+  if(!user) {
+    throw new ApiError(404, "User not found");
+  }
+
+  // update the user's profile fields
+  const { username, email, phone, address } = req.body;
+
+  if(username) user.username = username;
+  if(email) user.email = email;
+  if(phone) user.phone = phone;
+  if(address) user.address = address;
+
+  // save the updated user profile
+  const updatedUser = await user.save();
+
+  // return the response
+  return res
+   .status(200)
+   .json(new ApiResponse(200, updatedUser, "User profile updated successfully"));
+
+})
+
+// change password
+const changePass = asyncHandler(async(req, res) => {
+  const { oldPassword, newPassword } = req.body;
+
+  const user = await User.findById(req.user?._id);
+  const isPasswordCorrect = await user.isPasswordCorrect(oldPassword);
+
+  if (!isPasswordCorrect) {
+    throw new ApiError(400, "Invalid Old Password");
+  }
+
+  user.password = newPassword;
+  await user.save({ validateBeforeSave: false });
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, {}, "Password changed successfully"));
+})
+
+// Forget password
+// Reset password
+// Delete user account
+// Get all users (admin)
+// Update user role (admin)
+// Ban/Unban user (admin)
+
+export {
+  registerUser,
+  loginUser,
+  generateAccessAndRefreshToken,
+  logoutUser,
+  getUserDetails,
+  updateProfile,
+  changePass,
+};
