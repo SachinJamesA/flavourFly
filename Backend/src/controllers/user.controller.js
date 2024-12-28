@@ -36,12 +36,12 @@ const registerUser = asyncHandler(async (req, res) => {
   // return response if not send error
 
   // get user details from frontend
-  const { username, email, fullName, password, phone } = req.body;
-  console.log(phone);
+  const { username, email, fullName, password, phone, address } = req.body;
+  // console.log(phone);
 
   // Validation - not empty
   if (
-    [fullName, email, username, password, phone].some(
+    [fullName, email, username, password, phone, address].some(
       (field) => field?.trim() === " "
     )
   ) {
@@ -74,6 +74,7 @@ const registerUser = asyncHandler(async (req, res) => {
     password,
     username,
     phone,
+    address
   });
 
   // remove password and refresh token field from response
@@ -88,22 +89,13 @@ const registerUser = asyncHandler(async (req, res) => {
 
   // return response if not send error
   return res
-    .status(201)
-    .json(new ApiResponse(200, createdUser, "User registered successfully"));
+    .json(new ApiResponse( 200, createdUser, "User registered successfully"));
 });
 
 // Login user
 const loginUser = asyncHandler(async (req, res) => {
-  // get the data from req body
-  // login through username or email
-  // find the user
-  // check the password
-  // access and refresh token
-  // send cookies
-
   const { email, username, password } = req.body;
 
-  // if (!username && !email) {
   if (!(username || email)) {
     throw new ApiError(400, "username or email is required");
   }
@@ -120,35 +112,37 @@ const loginUser = asyncHandler(async (req, res) => {
     throw new ApiError(401, "Invalid user credentials");
   }
 
-  // access and refresh token
-  const { accessToken, refreshToken } = await generateAccessAndRefreshToken(
-    user._id
-  );
+  // Generate access and refresh tokens
+  const { accessToken, refreshToken } = await generateAccessAndRefreshToken(user._id);
 
-  const loggedInuser = await User.findById(user._id).select(
-    "-password -refreshToken"
-  );
+  const loggedInuser = await User.findById(user._id).select("-password -refreshToken");
 
   const options = {
     httpOnly: true,
     secure: true,
   };
-  return res
-    .status(200)
-    .cookie("accessToken", accessToken, options)
-    .cookie("refreshToken", refreshToken, options)
-    .json(
-      new ApiResponse(
-        200,
-        {
-          user: loggedInuser,
-          accessToken,
-          refreshToken,
-        },
-        "User Logged In Successfully"
-      )
-    );
+
+  // Set cookies and send response
+  res.cookie("accessToken", accessToken, options);
+  res.cookie("refreshToken", refreshToken, options);
+  // return res.json(
+  //   new ApiResponse(
+  //     200,
+  //     {
+  //       user: loggedInuser,
+  //       accessToken,
+  //       refreshToken,
+  //     },
+  //     "User Logged In Successfully"
+  //   )
+  // );
+  return res.status(200).json({
+    user: loggedInuser,
+    accessToken,
+    refreshToken,
+  });
 });
+
 
 // Logout user
 const logoutUser = asyncHandler(async (req, res) => {
@@ -175,7 +169,7 @@ const logoutUser = asyncHandler(async (req, res) => {
     .status(200)
     .clearCookie("accessToken", options)
     .clearCookie("refreshToken", options)
-    .json(new ApiResponse(200, {}, "User Logged Out"));
+    .json(new ApiResponse( {}, "User Logged Out"));
 });
 
 // get user details
@@ -195,7 +189,6 @@ const getUserDetails = asyncHandler(async (req, res) => {
 
   // Return the user details
   return res
-    .status(200)
     .json(new ApiResponse(200, user, "User details fetched successfully"));
 });
 
