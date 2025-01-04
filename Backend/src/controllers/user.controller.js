@@ -197,33 +197,58 @@ const updateProfile = asyncHandler(async (req, res) => {
   const userId = req.user._id;
 
   // Validate the user id
-  if(!mongoose.isValidObjectId(userId)) {
-    throw new ApiError(404, "User not found")
+  if (!mongoose.isValidObjectId(userId)) {
+    throw new ApiError(404, "User not found");
   }
 
   // Find the user 
   const user = await User.findById(userId);
-  if(!user) {
+  if (!user) {
     throw new ApiError(404, "User not found");
   }
 
-  // update the user's profile fields
-  const { username, email, phone, address } = req.body;
+  // Destructure fields from request body
+  const { username, email, phone, address, fullName } = req.body;
+  let avatar = user.avatar; // Default to current avatar if not updated
 
-  if(username) user.username = username;
-  if(email) user.email = email;
-  if(phone) user.phone = phone;
-  if(address) user.address = address;
+  // Check if there's an avatar in the request and handle file upload
+  if (req.files && req.files.avatar) {
+    const avatarFile = req.files.avatar;
 
-  // save the updated user profile
+    // Validate file type and size (optional)
+    if (!avatarFile.mimetype.startsWith('image/')) {
+      throw new ApiError(400, "Only image files are allowed");
+    }
+    if (avatarFile.size > 5 * 1024 * 1024) { // Limit to 5MB
+      throw new ApiError(400, "Image size should not exceed 5MB");
+    }
+
+    // Save the file to a directory or cloud storage
+    const filePath = `/uploads/avatars/${Date.now()}-${avatarFile.name}`; // For example, local directory path
+    avatarFile.mv(path.join(__dirname, '..', 'public', filePath), (err) => {
+      if (err) {
+        throw new ApiError(500, "Error uploading avatar");
+      }
+    });
+
+    avatar = filePath; // Update avatar field with the file path
+  }
+
+  // Update user fields
+  if (username) user.username = username;
+  if (fullName) user.fullName = fullName;
+  if (email) user.email = email;
+  if (phone) user.phone = phone;
+  if (address) user.address = address;
+  if (avatar) user.avatar = avatar;
+
+  // Save the updated user profile
   const updatedUser = await user.save();
 
-  // return the response
-  return res
-   .status(200)
-   .json(new ApiResponse(200, updatedUser, "User profile updated successfully"));
+  // Return the response
+  return res.status(200).json(new ApiResponse(200, updatedUser, "User profile updated successfully"));
+});
 
-})
 
 // change password
 const changePass = asyncHandler(async(req, res) => {

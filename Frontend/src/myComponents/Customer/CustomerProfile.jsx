@@ -1,9 +1,12 @@
 import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { FaEdit } from "react-icons/fa";
 
 const CustomerProfile = () => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -16,6 +19,13 @@ const CustomerProfile = () => {
             "Content-Type": "application/json",
           },
         });
+
+        if (response.status === 401) {
+          // Cookie expired or unauthorized
+          localStorage.removeItem("accessToken"); // Remove token from localStorage
+          navigate("/login"); // Redirect to login page
+          return;
+        }
 
         if (!response.ok) {
           throw new Error(`API Error: ${response.status} ${response.statusText}`);
@@ -96,6 +106,13 @@ const CustomerProfile = () => {
             </p>
           </div>
         </div>
+        <div className="mt-6 flex justify-center items-center">
+          <button className="flex items-center px-4 py-2 text-white bg-red-500 rounded hover:bg-red-600 space-x-2" onClick={() => navigate("/editprofile")}>
+            <FaEdit className="text-xl" />
+            <span>Edit Profile</span>
+          </button>
+        </div>
+
       </div>
     ) : (
       <div className="flex items-center justify-center h-screen text-lg text-gray-500">

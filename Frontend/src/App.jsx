@@ -1,7 +1,9 @@
+import { useState } from 'react';
 import './App.css';
 import CustomerMenu from './myComponents/Customer/CustomerMenu';
 import CustomerOrder from './myComponents/Customer/CustomerOrder';
 import CustomerProfile from './myComponents/Customer/CustomerProfile';
+import EditProfile from './myComponents/Utils/EditProfile';
 import Home from './myComponents/Utils/Home';
 import Login from './myComponents/Utils/Login';
 import Navbar from './myComponents/Utils/Navbar';
@@ -14,6 +16,15 @@ import {
 } from "react-router-dom";
 
 function App() {
+  // const [user, setUser] = useState();
+
+  // const userDetails = {
+  //   username: "JohnDoe",
+  //   email: "john.doe@example.com",
+  //   avatar: "https://via.placeholder.com/150",
+  // };
+
+  
 
   return (
     <Router>
@@ -25,6 +36,7 @@ function App() {
         <Route path='/customermenu' element={<CustomerMenu />}></Route>
         <Route path='/customerorder' element={<CustomerOrder />}></Route>
         <Route path='/customerprofile' element={<CustomerProfile />}></Route>
+        <Route path='/editprofile' element={<EditProfile />}></Route>
       </Routes>
     </Router>
   )
