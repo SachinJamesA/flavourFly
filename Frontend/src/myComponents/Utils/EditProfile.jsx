@@ -1,7 +1,10 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom'; // Import useNavigate for navigation
 import axios from 'axios';
+import { IoArrowBack } from 'react-icons/io5'; // Import an arrow back icon
 
 const ProfileEditor = () => {
+  const navigate = useNavigate(); // Initialize navigate
   const [profile, setProfile] = useState({
     username: '',
     email: '',
@@ -36,6 +39,15 @@ const ProfileEditor = () => {
 
   return (
     <div className="max-w-md mx-auto bg-white shadow-md rounded-md p-6 mt-6">
+      {/* Back Button */}
+      <button
+        onClick={() => navigate(-1)}
+        className="flex items-center text-blue-500 hover:text-blue-600 mb-4"
+      >
+        <IoArrowBack className="mr-2" size={20} />
+        Back
+      </button>
+
       <h2 className="text-2xl font-bold mb-4">Edit Profile</h2>
       <div className="space-y-4">
         <div>

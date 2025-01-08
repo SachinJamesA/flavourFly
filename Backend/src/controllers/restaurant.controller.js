@@ -15,7 +15,7 @@ const addRestaurant = asyncHandler(async (req, res) => {
   const { restaurantName, restaurantAddress, menu, contact } = req.body;
 
   // validate inputs (whichever fields are required )
-  if (!restaurantName || !restaurantAddress || !menu || !contact) {
+  if (!restaurantName || !restaurantAddress || !contact) {
     throw new ApiError(400, "All fields are required");
   }
 
@@ -46,7 +46,6 @@ const addRestaurant = asyncHandler(async (req, res) => {
   const newRestaurant = await Restaurant.create({
     restaurantName,
     restaurantAddress,
-    menu,
     contact,
     coverImage: coverImage?.url || "",
   });

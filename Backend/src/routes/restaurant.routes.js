@@ -1,4 +1,5 @@
 import { Router } from "express";
+import { verifyJWT } from "../midlewares/auth.middleware.js";
 import {
   addMenuItem,
   addRestaurant,
@@ -30,9 +31,9 @@ router.route("/addRestaurant").post(
 );
 
 router.route("/getAllRestaurants").get(getAllRestaurants);
-router.route("/:id").get(getSingleRestaurant);
-router.route("/:id").delete(deleteRestaurant);
-router.route("/:id").put(updateRestaurants);
+router.route("/singlerestaurant").get(verifyJWT ,getSingleRestaurant);
+router.route("/deleterestaurant").delete(verifyJWT ,deleteRestaurant);
+router.route("updaterestaurant").put(verifyJWT ,updateRestaurants);
 
 router.route("/:id/menu").post(
   upload.fields([
@@ -43,7 +44,7 @@ router.route("/:id/menu").post(
   ]),
   addMenuItem
 );
-router.route("/:id/menu").get(getMenuItems);
+router.route("/menu").get(getMenuItems);
 
 router.route("/:id/foodItem").put(
   upload.fields([

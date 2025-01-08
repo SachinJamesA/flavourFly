@@ -49,7 +49,7 @@ const restaurantSchema = new Schema(
     },
     status: {
       type: String,
-      required: true,
+      // required: true,
       enum: ["available", "Closed"]
     }
   },

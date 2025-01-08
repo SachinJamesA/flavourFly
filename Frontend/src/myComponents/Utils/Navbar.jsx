@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { FiChevronDown, FiChevronUp } from "react-icons/fi";
 
@@ -7,18 +7,22 @@ const Navbar = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [user, setUser] = useState(null);
+  const dropdownRef = useRef(null); // Ref for dropdown menu
 
   const handleMenuToggle = () => setIsMobileMenuOpen(!isMobileMenuOpen);
 
-  const token = localStorage.getItem('accessToken');
-
   const handleLogout = () => {
     localStorage.removeItem("accessToken");
+    setUser(null); // Clear user state
     navigate("/login");
     alert("Logged out successfully!");
   };
 
   useEffect(() => {
+    const token = localStorage.getItem("accessToken");
+
+    if (!token) return; // Skip fetching user details if no token exists
+
     const fetchUser = async () => {
       try {
         const response = await fetch("/v1/users/getUserDetails", {
@@ -37,16 +41,28 @@ const Navbar = () => {
 
         const data = await response.json();
         if (!data || !data.data) throw new Error("Invalid API response");
+        console.log(data.data.role)
 
         setUser(data.data);
       } catch (err) {
         console.error(err.message || "Error fetching user data");
       }
     };
+
     fetchUser();
   }, [navigate]);
 
-  if (!user) return null;
+  useEffect(() => {
+    // Close dropdown if clicked outside
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setIsDropdownOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   return (
     <nav className="bg-white shadow-md">
@@ -71,13 +87,21 @@ const Navbar = () => {
             >
               Menu
             </Link>
+            {user?.role === "Admin" && (
+              <Link
+                to="/addrestaurant"
+                className="bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600 transition inline-block"
+              >
+                Add Restaurant
+              </Link>
+            )}
 
-            {token ? (
-              <div className="relative">
+            {user ? (
+              <div className="relative" ref={dropdownRef}>
                 <div className="flex items-center space-x-2">
                   {/* Avatar */}
                   <img
-                    src={user.avatar} // Replace with the path to your avatar image
+                    src={user.avatar || "/default-avatar.png"}
                     alt="User Avatar"
                     className="w-8 h-8 rounded-full cursor-pointer border-2 border-gray-200"
                     onClick={() => setIsDropdownOpen(!isDropdownOpen)}
@@ -91,29 +115,6 @@ const Navbar = () => {
                     {user.username || "Not provided"}
                   </span>
 
-                  {/* Dropdown */}
-                  {isDropdownOpen && (
-                    <div className="absolute top-12 right-0 bg-white shadow-lg rounded-lg py-2 w-40 z-10">
-                      <Link
-                        to="/customerprofile"
-                        className="flex px-4 py-2 text-gray-700 hover:bg-gray-100 hover:text-blue-600 transition"
-                      >
-                        Profile
-                      </Link>
-                      <Link
-                        to="/customerorder"
-                        className="flex px-4 py-2 text-gray-700 hover:bg-gray-100 hover:text-blue-600 transition"
-                      >
-                        Orders
-                      </Link>
-                      <button
-                        onClick={handleLogout}
-                        className="block w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100 hover:text-blue-600 transition"
-                      >
-                        Logout
-                      </button>
-                    </div>
-                  )}
                   {isDropdownOpen ? (
                     <FiChevronUp
                       className="text-gray-700 cursor-pointer"
@@ -126,6 +127,47 @@ const Navbar = () => {
                     />
                   )}
                 </div>
+
+                {/* Dropdown */}
+                {isDropdownOpen && (
+                  <div className="absolute top-12 right-0 bg-white shadow-lg rounded-lg py-2 w-40 z-10">
+                    {/* {user.role === "Customer" ? ( */}
+                      <Link
+                        to="/customerprofile"
+                        className="flex px-4 py-2 text-gray-700 hover:bg-gray-100 hover:text-blue-600 transition"
+                      >
+                        Profile
+                      </Link>
+                    {/* ) : user.role === "Admin" ? (
+                      <Link
+                        to="/adminprofile"
+                        className="flex px-4 py-2 text-gray-700 hover:bg-gray-100 hover:text-blue-600 transition"
+                      >
+                        Admin Profile
+                      </Link>
+                    ) : user.role === "deliveryPerson" ? (
+                      <Link
+                        to="/deliveryprofile"
+                        className="flex px-4 py-2 text-gray-700 hover:bg-gray-100 hover:text-blue-600 transition"
+                      >
+                        Delivery Profile
+                      </Link>
+                    ) : null} */}
+
+                    <Link
+                      to="/customerorder"
+                      className="flex px-4 py-2 text-gray-700 hover:bg-gray-100 hover:text-blue-600 transition"
+                    >
+                      Orders
+                    </Link>
+                    <button
+                      onClick={handleLogout}
+                      className="block w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100 hover:text-blue-600 transition"
+                    >
+                      Logout
+                    </button>
+                  </div>
+                )}
               </div>
             ) : (
               <Link
@@ -139,8 +181,7 @@ const Navbar = () => {
                   Login
                 </button>
               </Link>
-            )
-            }
+            )}
           </div>
 
           {/* Mobile Menu Button */}
@@ -191,29 +232,41 @@ const Navbar = () => {
             >
               Menu
             </Link>
-            <Link
-              to="/customerorder"
-              className="block px-4 py-2 text-gray-700 hover:bg-blue-100"
-              onClick={() => setIsMobileMenuOpen(false)}
-            >
-              Orders
-            </Link>
-            <Link
-              to="/customerprofile"
-              className="block px-4 py-2 text-gray-700 hover:bg-blue-100"
-              onClick={() => setIsMobileMenuOpen(false)}
-            >
-              Profile
-            </Link>
-            <button
-              onClick={() => {
-                handleLogout();
-                setIsMobileMenuOpen(false);
-              }}
-              className="block px-4 py-2 text-white bg-red-500 rounded hover:bg-red-600"
-            >
-              Logout
-            </button>
+            {user ? (
+              <>
+                <Link
+                  to="/customerorder"
+                  className="block px-4 py-2 text-gray-700 hover:bg-blue-100"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  Orders
+                </Link>
+                <Link
+                  to="/customerprofile"
+                  className="block px-4 py-2 text-gray-700 hover:bg-blue-100"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  Profile
+                </Link>
+                <button
+                  onClick={() => {
+                    handleLogout();
+                    setIsMobileMenuOpen(false);
+                  }}
+                  className="block px-4 py-2 text-white bg-red-500 rounded hover:bg-red-600"
+                >
+                  Logout
+                </button>
+              </>
+            ) : (
+              <Link
+                to="/login"
+                className="block px-4 py-2 text-gray-700 hover:bg-blue-100"
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                Login
+              </Link>
+            )}
           </div>
         )}
       </div>

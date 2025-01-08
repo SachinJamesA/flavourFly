@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import './App.css';
 import CustomerMenu from './myComponents/Customer/CustomerMenu';
 import CustomerOrder from './myComponents/Customer/CustomerOrder';
@@ -14,17 +14,50 @@ import {
   Routes
   // Link
 } from "react-router-dom";
+import AddRestaurant from './myComponents/Admin/AddRestaurant';
+import AdminProfile from './myComponents/Admin/AdminProfile';
+import axios from 'axios';
 
 function App() {
-  // const [user, setUser] = useState();
+  // const [currentUser, setCurrentUser] = useState(null);
+  // const [restaurant, setRestaurant] = useState(null);
+  // const [loading, setLoading] = useState(true);
+  // const [error, setError] = useState(null);
 
-  // const userDetails = {
-  //   username: "JohnDoe",
-  //   email: "john.doe@example.com",
-  //   avatar: "https://via.placeholder.com/150",
-  // };
+  // useEffect(() => {
+  //   // Replace with your API endpoint
+  //   axios
+  //     .get("/v1/users/getUserDetails")
+  //     .then((response) => {
+  //       setCurrentUser(response.data); // Assume response.data contains the user data
+  //       setLoading(false);
+  //     })
+  //     .catch((err) => {
+  //       setError("Failed to load user data.");
+  //       setLoading(false);
+  //     });
+  // }, []);
 
-  
+  // useEffect(() => {
+  //   axios.get("/v1/restaurants/singlerestaurant")
+  //   .then((response) => {
+  //     setRestaurant(response.data); // Assume response.data contains the user data
+  //     setLoading(false);
+  //   })
+  //   .catch((err) => {
+  //     setError("Failed to load user data.");
+  //     setLoading(false);
+  //   });
+  // }, []);
+
+  // if (loading) {
+  //   return <p>Loading user...</p>;
+  // }
+
+  // if (error) {
+  //   return <p>{error}</p>;
+  // }
+
 
   return (
     <Router>
@@ -37,6 +70,9 @@ function App() {
         <Route path='/customerorder' element={<CustomerOrder />}></Route>
         <Route path='/customerprofile' element={<CustomerProfile />}></Route>
         <Route path='/editprofile' element={<EditProfile />}></Route>
+
+        {/* <Route path='/adminprofile' element={<AdminProfile />}></Route> */}
+        <Route path='/addrestaurant' element={<AddRestaurant />}></Route>
       </Routes>
     </Router>
   )

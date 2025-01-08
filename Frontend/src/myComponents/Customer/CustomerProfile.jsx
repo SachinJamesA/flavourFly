@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { FaEdit } from "react-icons/fa";
+import { FaEdit, FaArrowLeft } from "react-icons/fa";
 
 const CustomerProfile = () => {
   const [user, setUser] = useState(null);
@@ -11,8 +11,6 @@ const CustomerProfile = () => {
   useEffect(() => {
     const fetchUser = async () => {
       try {
-        console.log("Fetching user details...");
-
         const response = await fetch("/v1/users/getUserDetails", {
           credentials: "include",
           headers: {
@@ -21,34 +19,30 @@ const CustomerProfile = () => {
         });
 
         if (response.status === 401) {
-          // Cookie expired or unauthorized
-          localStorage.removeItem("accessToken"); // Remove token from localStorage
-          navigate("/login"); // Redirect to login page
+          localStorage.removeItem("accessToken");
+          navigate("/login");
           return;
         }
 
         if (!response.ok) {
-          throw new Error(`API Error: ${response.status} ${response.statusText}`);
+          throw new Error(`Error: ${response.statusText}`);
         }
 
         const data = await response.json();
-        console.log("API Response:", data);
-
         if (!data || !data.data) {
-          throw new Error("Invalid API response: Missing user data.");
+          throw new Error("Invalid response: Missing user data.");
         }
 
         setUser(data.data);
       } catch (err) {
-        console.error("Error fetching user data:", err);
-        setError(err.message || "An unexpected error occurred.");
+        setError(err.message || "An error occurred. Please try again later.");
       } finally {
         setLoading(false);
       }
     };
 
     fetchUser();
-  }, []);
+  }, [navigate]);
 
   if (loading) {
     return <div className="flex items-center justify-center h-screen text-xl">Loading...</div>;
@@ -63,60 +57,74 @@ const CustomerProfile = () => {
   }
 
   return (
-    user ? (
-      <div className="flex flex-col items-center bg-gradient-to-r from-blue-50 to-indigo-50 p-6 rounded-lg shadow-lg max-w-3xl mx-auto mt-10">
-        <div className="flex flex-col items-center mb-6">
+    user && (
+      <div className="flex flex-col items-center bg-gradient-to-r from-blue-100 to-indigo-100 p-6 rounded-lg shadow-lg max-w-4xl mx-auto mt-10">
+        {/* Back Button */}
+        <button
+          className="self-start mb-4 flex items-center text-gray-700 hover:text-gray-900"
+          onClick={() => navigate(-1)}
+        >
+          <FaArrowLeft className="mr-2" />
+          Back
+        </button>
+
+        {/* Avatar and Welcome Message */}
+        <div className="flex flex-col items-center mb-8">
           {user.avatar ? (
-            <div className="group relative">
+            <div className="relative w-40 h-40 rounded-full overflow-hidden border-4 border-indigo-500 shadow-lg">
               <img
                 src={user.avatar}
                 alt={`${user.username || "User"}'s avatar`}
-                className="rounded-full w-32 h-32 object-cover border-4 border-blue-500 shadow-md transform group-hover:scale-110 transition duration-300"
+                className="w-full h-full object-cover"
               />
             </div>
           ) : (
-            <div className="flex items-center justify-center w-32 h-32 rounded-full bg-gray-300 text-gray-600 text-lg">
+            <div className="flex items-center justify-center w-40 h-40 rounded-full bg-gray-300 text-gray-600 text-lg shadow-lg">
               No Image
             </div>
           )}
           <h1 className="text-3xl font-bold mt-4 text-indigo-700">
-            Welcome, {user.username || "Guest"}!
+            Hello, {user.username || "Guest"}!
           </h1>
+          <p className="text-gray-600 mt-1">Welcome back to your profile</p>
         </div>
 
+        {/* User Details */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full px-4">
-          <div className="flex flex-col items-start bg-white rounded-lg p-4 shadow">
-            <p className="text-gray-600 font-semibold">
-              <strong>Email:</strong> {user.email || "Not Provided"}
-            </p>
-          </div>
-          <div className="flex flex-col items-start bg-white rounded-lg p-4 shadow">
-            <p className="text-gray-600 font-semibold">
-              <strong>Full Name:</strong> {user.fullName || "Not Provided"}
-            </p>
-          </div>
-          <div className="flex flex-col items-start bg-white rounded-lg p-4 shadow">
-            <p className="text-gray-600 font-semibold">
-              <strong>Phone:</strong> {user.phone || "Not Provided"}
-            </p>
-          </div>
-          <div className="flex flex-col items-start bg-white rounded-lg p-4 shadow">
-            <p className="text-gray-600 font-semibold">
-              <strong>Address:</strong> {user.address || "Not Provided"}
-            </p>
-          </div>
+          {[
+            { label: "Email", value: user.email },
+            { label: "Full Name", value: user.fullName },
+            { label: "Phone", value: user.phone },
+            { label: "Address", value: user.address },
+            { label: "Role", value: user.role || "User" },
+            {
+              label: "Joined",
+              value: user.createdAt
+                ? new Date(user.createdAt).toLocaleString("en-US", {
+                    dateStyle: "medium",
+                    timeStyle: "short",
+                  })
+                : "Not Provided",
+            },
+          ].map(({ label, value }) => (
+            <div key={label} className="bg-white rounded-lg p-6 shadow-md">
+              <p className="text-gray-700 font-semibold">
+                <strong>{label}:</strong> {value || "Not Provided"}
+              </p>
+            </div>
+          ))}
         </div>
-        <div className="mt-6 flex justify-center items-center">
-          <button className="flex items-center px-4 py-2 text-white bg-red-500 rounded hover:bg-red-600 space-x-2" onClick={() => navigate("/editprofile")}>
-            <FaEdit className="text-xl" />
-            <span>Edit Profile</span>
+
+        {/* Edit Button */}
+        <div className="mt-8">
+          <button
+            className="flex items-center px-5 py-3 text-white bg-indigo-500 rounded-lg hover:bg-indigo-600"
+            onClick={() => navigate("/editprofile")}
+          >
+            <FaEdit className="mr-2" />
+            Edit Profile
           </button>
         </div>
-
-      </div>
-    ) : (
-      <div className="flex items-center justify-center h-screen text-lg text-gray-500">
-        No user data available
       </div>
     )
   );

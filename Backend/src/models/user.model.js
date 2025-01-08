@@ -45,6 +45,11 @@ const userSchema = new Schema(
     address: {
       type: String,
     },
+    role: {
+      type: String,
+      enum: ["Admin", "deliveryPerson", "Customer"],
+      // default: "Customer",
+    },
     // Fields for delivery person
     deliveryArea: {
       type: String,

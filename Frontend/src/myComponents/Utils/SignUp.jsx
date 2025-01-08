@@ -1,19 +1,21 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import { IoArrowBack } from 'react-icons/io5'; // Import an arrow back icon
 
 const Signup = () => {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
     username: "",
     email: "",
-    // fullName: "",
+    fullName: "",
     phone: "",
     avatar: null,
     password: "",
     confirmPassword: "",
     address: "",
     deliveryArea: "",
+    role: "",
   });
 
   const [error, setError] = useState(null);
@@ -30,94 +32,90 @@ const Signup = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError(null);
-  
-    // Check if passwords match
+
+    // Validate passwords
     if (formData.password !== formData.confirmPassword) {
       setError("Passwords do not match");
       return;
     }
-  
+
     try {
       // Create FormData object
       const formDataToSend = new FormData();
-      for (const key in formData) {
-        if (formData[key]) {
-          formDataToSend.append(key, formData[key]);
+      Object.entries(formData).forEach(([key, value]) => {
+        if (value) {
+          formDataToSend.append(key, value);
         }
-      }
-  
-      // Send POST request using axios
-      const response = await axios.post(
-        "/v1/users/register",
-        formDataToSend,
-        {
-          headers: {
-            "Content-Type": "multipart/form-data", // Set content type for FormData
-          },
-        }
-      );
-  
-      // Handle success
+      });
+
+      // Send request
+      const response = await axios.post("/v1/users/register", formDataToSend, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+
       alert("Signup successful! Redirecting to login...");
       navigate("/login");
     } catch (err) {
-      // Handle errors
       setError(err.response?.data?.error || "Signup failed. Please try again.");
       console.error("Signup error:", err);
     }
   };
-  
 
   return (
     <div className="flex justify-center items-center min-h-screen bg-gray-100">
-      <div className="w-full max-w-md bg-white p-8 rounded-lg shadow-md">
+      <div className="w-full max-w-md bg-white p-8 rounded-lg shadow-md mt-2">
+        {/* Back Button */}
+        <button
+          onClick={() => navigate(-1)}
+          className="flex items-center text-blue-500 hover:text-blue-600 mb-4"
+        >
+          <IoArrowBack className="mr-2" size={20} />
+          Back
+        </button>
         <h2 className="text-2xl font-bold text-center mb-6">Signup</h2>
         {error && <p className="text-red-500 text-sm mb-4">{error}</p>}
         <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium mb-1">Username</label>
-            <input
-              type="text"
-              name="username"
-              value={formData.username}
-              onChange={handleChange}
-              className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              required
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium mb-1">Email</label>
-            <input
-              type="email"
-              name="email"
-              value={formData.email}
-              onChange={handleChange}
-              className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              required
-              />
-          <div>
-          <div>
-            <label className="block text-sm font-medium mb-1">Full Name</label>
-            <input
-              type="text"
-              name="fullName"
-              value={formData.fullName}
-              onChange={handleChange}
-              className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              required
-            />
-          </div>
-          </div>
-            <label className="block text-sm font-medium mb-1">Phone Number</label>
-            <input
-              type="text"
-              name="phone"
-              value={formData.phone}
-              onChange={handleChange}
-              className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              required
-            />
-          </div>
+          {/* Username */}
+          <InputField
+            label="Username"
+            name="username"
+            type="text"
+            value={formData.username}
+            onChange={handleChange}
+            required
+          />
+
+          {/* Email */}
+          <InputField
+            label="Email"
+            name="email"
+            type="email"
+            value={formData.email}
+            onChange={handleChange}
+            required
+          />
+
+          {/* Full Name */}
+          <InputField
+            label="Full Name"
+            name="fullName"
+            type="text"
+            value={formData.fullName}
+            onChange={handleChange}
+            required
+          />
+
+          {/* Phone */}
+          <InputField
+            label="Phone Number"
+            name="phone"
+            type="text"
+            value={formData.phone}
+            onChange={handleChange}
+            required
+          />
+
+          {/* Avatar */}
           <div>
             <label className="block text-sm font-medium mb-1">Avatar</label>
             <input
@@ -129,48 +127,62 @@ const Signup = () => {
               required
             />
           </div>
+
+          {/* Password */}
+          <InputField
+            label="Password"
+            name="password"
+            type="password"
+            value={formData.password}
+            onChange={handleChange}
+            required
+          />
+
+          {/* Confirm Password */}
+          <InputField
+            label="Confirm Password"
+            name="confirmPassword"
+            type="password"
+            value={formData.confirmPassword}
+            onChange={handleChange}
+            required
+          />
+
+          {/* Address */}
+          <InputField
+            label="Address"
+            name="address"
+            type="text"
+            value={formData.address}
+            onChange={handleChange}
+          />
+
+          {/* Delivery Area */}
+          <InputField
+            label="Delivery Area (Optional)"
+            name="deliveryArea"
+            type="text"
+            value={formData.deliveryArea}
+            onChange={handleChange}
+          />
+
+          {/* Role */}
           <div>
-            <label className="block text-sm font-medium mb-1">Password</label>
-            <input
-              type="password"
-              name="password"
-              value={formData.password}
+            <label className="block text-sm font-medium mb-1">Role</label>
+            <select
+              name="role"
+              value={formData.role}
               onChange={handleChange}
               className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
               required
-            />
+            >
+              <option value="Customer">Customer</option>
+              <option value="Admin">Admin</option>
+              <option value="deliveryPerson">Delivery Person</option>
+            </select>
           </div>
-          <div>
-            <label className="block text-sm font-medium mb-1">Confirm Password</label>
-            <input
-              type="password"
-              name="confirmPassword"
-              value={formData.confirmPassword}
-              onChange={handleChange}
-              className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              required
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium mb-1">Address</label>
-            <input
-              type="text"
-              name="address"
-              value={formData.address}
-              onChange={handleChange}
-              className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium mb-1">Delivery Area (Optional)</label>
-            <input
-              type="text"
-              name="deliveryArea"
-              value={formData.deliveryArea}
-              onChange={handleChange}
-              className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-          </div>
+
+          {/* Submit Button */}
           <button
             type="submit"
             className="w-full bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600 transition"
@@ -182,5 +194,19 @@ const Signup = () => {
     </div>
   );
 };
+
+const InputField = ({ label, name, type, value, onChange, required }) => (
+  <div>
+    <label className="block text-sm font-medium mb-1">{label}</label>
+    <input
+      type={type}
+      name={name}
+      value={value}
+      onChange={onChange}
+      className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+      required={required}
+    />
+  </div>
+);
 
 export default Signup;
