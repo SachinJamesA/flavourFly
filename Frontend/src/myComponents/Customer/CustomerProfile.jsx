@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { FaEdit, FaArrowLeft } from "react-icons/fa";
+import AdminProfile from "../Admin/AdminProfile";
 
 const CustomerProfile = () => {
   const [user, setUser] = useState(null);
@@ -91,22 +92,25 @@ const CustomerProfile = () => {
 
         {/* User Details */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full px-4">
-          {[
-            { label: "Email", value: user.email },
-            { label: "Full Name", value: user.fullName },
-            { label: "Phone", value: user.phone },
-            { label: "Address", value: user.address },
-            { label: "Role", value: user.role || "User" },
-            {
-              label: "Joined",
-              value: user.createdAt
-                ? new Date(user.createdAt).toLocaleString("en-US", {
-                    dateStyle: "medium",
-                    timeStyle: "short",
-                  })
-                : "Not Provided",
-            },
-          ].map(({ label, value }) => (
+          {[{
+            label: "Email", value: user.email,
+          }, {
+            label: "Full Name", value: user.fullName,
+          }, {
+            label: "Phone", value: user.phone,
+          }, {
+            label: "Address", value: user.address,
+          }, {
+            label: "Role", value: user.role || "User",
+          }, {
+            label: "Joined",
+            value: user.createdAt
+              ? new Date(user.createdAt).toLocaleString("en-US", {
+                  dateStyle: "medium",
+                  timeStyle: "short",
+                })
+              : "Not Provided",
+          }].map(({ label, value }) => (
             <div key={label} className="bg-white rounded-lg p-6 shadow-md">
               <p className="text-gray-700 font-semibold">
                 <strong>{label}:</strong> {value || "Not Provided"}
@@ -114,6 +118,13 @@ const CustomerProfile = () => {
             </div>
           ))}
         </div>
+
+        {/* Admin Profile Section */}
+        {user.role === "Admin" && (
+          <div className="mt-10 w-full">
+            <AdminProfile />
+          </div>
+        )}
 
         {/* Edit Button */}
         <div className="mt-8">

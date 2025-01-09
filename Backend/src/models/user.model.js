@@ -50,6 +50,10 @@ const userSchema = new Schema(
       enum: ["Admin", "deliveryPerson", "Customer"],
       // default: "Customer",
     },
+    restaurantId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Restaurant",
+    },
     // Fields for delivery person
     deliveryArea: {
       type: String,

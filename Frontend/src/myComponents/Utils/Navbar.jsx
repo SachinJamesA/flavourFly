@@ -87,7 +87,7 @@ const Navbar = () => {
             >
               Menu
             </Link>
-            {user?.role === "Admin" && (
+            {user?.role === "Admin" && user?.restaurants !== 0 && (
               <Link
                 to="/addrestaurant"
                 className="bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600 transition inline-block"

@@ -5,22 +5,27 @@ const Menu = ({ restaurantId }) => {
   const [menu, setMenu] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [restaurants, setRestaurants] = useState([]);
 
   useEffect(() => {
-    // Fetch the menu items for the restaurant by its ID
     const fetchMenu = async () => {
       try {
-        const response = await axios.get(`/v1/api/restaurants/getAllRestaurants`);
-        setMenu(response.data.menu); // Assuming the API response includes a 'menu' array
-        setLoading(false);
+        const response = await fetch('v1/restaurants/getAllRestaurants', {
+          method: "GET",
+          credentials: "include",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        })
+  
+        const data = await response.json();
+        if (!data || !data.data || !data.data.restaurants) throw new Error("Invalid API response");
+        setRestaurants(data.data.restaurants);
       } catch (err) {
-        setError('Error fetching menu items');
-        setLoading(false);
+        console.error(err.message || "Error fetching user data");
       }
-    };
-
-    fetchMenu();
-  }, [restaurantId]);
+    }
+  }, []);
 
   if (loading) {
     return <p>Loading menu...</p>;
